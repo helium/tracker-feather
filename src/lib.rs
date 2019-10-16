@@ -2,4 +2,6 @@
 //!
 
 #![no_std]
-pub use stm32l0xx_hal as hal;
+extern crate stm32l0xx_hal as hal;
+
+pub mod longfi_bindings;

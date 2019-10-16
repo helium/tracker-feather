@@ -4,10 +4,17 @@ version = "0.1.0"
 authors = ["Louis Thiery <louis@helium.com>"]
 edition = "2018"
 
+[dependencies]
+cortex-m = {version = "0.6.0", features = ["const-fn"] }
+longfi-device = { git = "ssh://git@github.com/helium/longfi-device-rs.git", branch = "lthiery/sx126x" }
+embedded-hal = { version = "0.2.3", features = ["unproven"] }
+nb = "0.1.2"
 
 [dependencies.stm32l0xx-hal]
-version  = "0.3.1"
-features = ["rt", "stm32l082"]
+git                     = "https://github.com/lthiery/stm32l0xx-hal.git"
+features                = ["stm32l0x2","rt"]
+branch                  = "enable-spi2"
+
 
 [dev-dependencies]
 cortex-m    = "0.6.1"
