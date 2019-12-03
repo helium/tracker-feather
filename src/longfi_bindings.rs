@@ -244,20 +244,19 @@ extern "C" fn delay_ms(ms: u32) {
 
 static mut RNG: Option<rng::Rng> = None;
 pub extern "C" fn get_random_bits(_bits: u8) -> u32 {
-    0
-    // unsafe {
-    //     if let Some(rng) = &mut RNG {
-    //         // enable starts the ADC conversions that generate the random number
-    //         rng.enable();
-    //         // wait until the flag flips; interrupt driven is possible but no implemented
-    //         rng.wait();
-    //         // reading the result clears the ready flag
-    //         let val = rng.take_result();
-    //         // can save some power by disabling until next random number needed
-    //         rng.disable();
-    //         val
-    //     } else {
-    //         panic!("No Rng exists!");
-    //     }
-    // }
+    unsafe {
+        if let Some(rng) = &mut RNG {
+            // enable starts the ADC conversions that generate the random number
+            rng.enable();
+            // wait until the flag flips; interrupt driven is possible but no implemented
+            rng.wait();
+            // reading the result clears the ready flag
+            let val = rng.take_result();
+            // can save some power by disabling until next random number needed
+            rng.disable();
+            val
+        } else {
+            panic!("No Rng exists!");
+        }
+    }
 }
