@@ -9,7 +9,7 @@ use rtfm::app;
 use stm32l0xx_hal as hal;
 
 use longfi_device;
-use longfi_device::{ClientEvent, Config, LongFi, RadioType, RfEvent};
+use longfi_device::{ClientEvent, Config, LongFi, Radio, RfEvent};
 
 use core::fmt::Write;
 use helium_tracker_feather;
@@ -92,7 +92,7 @@ const APP: () = {
         if let Some(bindings) = BINDINGS {
             longfi_radio = unsafe {
                 LongFi::new(
-                    RadioType::Sx1262,
+                    Radio::sx1262(),
                     &mut bindings.bindings,
                     rf_config,
                     &PRESHARED_KEY,
