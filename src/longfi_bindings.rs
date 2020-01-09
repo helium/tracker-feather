@@ -1,11 +1,7 @@
 use crate::hal::prelude::*;
-use hal::device;
-use hal::exti;
+use hal::{rng, spi, pac, exti::{TriggerEdge, line::{ExtiLine, GpioLine}}};
 use hal::gpio::*;
-use hal::pac;
 use hal::rcc::Rcc;
-use hal::rng;
-use hal::spi;
 use longfi_device::{AntPinsMode, BoardBindings};
 use nb::block;
 
@@ -23,14 +19,14 @@ pub fn initialize_radio_irq(
     syscfg: &mut hal::syscfg::SYSCFG,
     exti: &mut pac::EXTI,
 ) -> RadioIRQ {
-    // // Configure PB0 as input.
+    // Configure PB0 as input.
     let dio1 = pin.into_floating_input();
 
-    exti.listen(
+    exti.listen_gpio(
         syscfg,
         dio1.port(),
-        dio1.pin_number(),
-        exti::TriggerEdge::Rising,
+        GpioLine::from_raw_line(dio1.pin_number()).unwrap(),
+        TriggerEdge::Rising,
     );
 
     dio1
@@ -38,7 +34,7 @@ pub fn initialize_radio_irq(
 
 impl LongFiBindings {
     pub fn new(
-        spi_peripheral: device::SPI2,
+        spi_peripheral: pac::SPI2,
         rcc: &mut Rcc,
         rng: rng::Rng,
         spi_sck: gpiob::PB13<Uninitialized>,
