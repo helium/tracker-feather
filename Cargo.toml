@@ -12,7 +12,7 @@ nb = "0.1.2"
 
 [dependencies.stm32l0xx-hal]
 git = "https://github.com/jonas-schievink/stm32l0xx-hal.git"
-branch = "serial-error"
+branch = "serial-irq"
 features = ["stm32l0x2", "rt"]
 
 
@@ -28,7 +28,7 @@ stm32-usbd  = "0.5.0"
 
 [dev-dependencies.stm32l0xx-hal]
 git = "https://github.com/jonas-schievink/stm32l0xx-hal.git"
-branch = "serial-error"
+branch = "serial-irq"
 features = ["stm32-usbd"]
 
 [profile.release]
