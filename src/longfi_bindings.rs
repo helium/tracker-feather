@@ -98,7 +98,7 @@ pub struct AntennaSwitches<AntEn, SeCsd, SeCps, SeCtx> {
 }
 
 extern "C" fn reduce_power(power: u8) -> u8 {
-    12
+    17
 }
 
 impl<AntEn, SeCsd, SeCps, SeCtx> AntennaSwitches<AntEn, SeCsd, SeCps, SeCtx>
@@ -131,7 +131,7 @@ where
 
     pub fn set_tx(&mut self) {
         self.ant_en.set_low();
-        self.se_cps.set_low();
+        self.se_cps.set_high();
         self.se_csd.set_high();
         self.se_ctx.set_high();
     }
