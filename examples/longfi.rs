@@ -21,18 +21,18 @@ static mut PRESHARED_KEY: [u8; 16] = [
 #[app(device = stm32l0xx_hal::pac, peripherals = true)]
 const APP: () = {
     struct Resources {
-        int: pac::EXTI,
-        radio_irq: helium_tracker_feather::RadioIRQ,
-        debug_uart: serial::Tx<helium_tracker_feather::DebugUsart>,
-        uart_rx: serial::Rx<helium_tracker_feather::DebugUsart>,
         #[init([0;512])]
         buffer: [u8; 512],
         #[init(0)]
         count: u8,
+        int: pac::EXTI,
+        radio_irq: helium_tracker_feather::RadioIRQ,
+        debug_uart: serial::Tx<helium_tracker_feather::DebugUsart>,
+        uart_rx: serial::Rx<helium_tracker_feather::DebugUsart>,
         longfi: LongFi,
     }
 
-    #[init(spawn = [send_ping], resources = [buffer])]
+    #[init(resources = [buffer])]
     fn init(ctx: init::Context) -> init::LateResources {
         static mut BINDINGS: Option<helium_tracker_feather::LongFiBindings> = None;
         let device = ctx.device;
@@ -199,7 +199,7 @@ const APP: () = {
         ctx.spawn.send_ping().unwrap();
     }
 
-    #[task(binds = EXTI0_1, priority = 2, resources = [radio_irq, int], spawn = [radio_event])]
+    #[task(binds = EXTI0_1, priority = 1, resources = [radio_irq, int], spawn = [radio_event])]
     fn EXTI0_1(ctx: EXTI0_1::Context) {
         ctx.resources
             .int
