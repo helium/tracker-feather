@@ -1,5 +1,4 @@
 use crate::hal::prelude::*;
-use hal::device;
 use hal::exti;
 use hal::gpio::*;
 use hal::pac;
@@ -38,7 +37,7 @@ pub fn initialize_radio_irq(
 
 impl LongFiBindings {
     pub fn new(
-        spi_peripheral: device::SPI2,
+        spi_peripheral: pac::SPI2,
         rcc: &mut Rcc,
         rng: rng::Rng,
         spi_sck: gpiob::PB13<Uninitialized>,
