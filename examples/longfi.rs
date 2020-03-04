@@ -4,7 +4,7 @@
 extern crate nb;
 extern crate panic_halt;
 
-use hal::{pac, prelude::*, rcc, rng::Rng, serial, syscfg};
+use hal::{exti::{self, Exti, ExtiLine as _}, prelude::*, rcc, rng::Rng, serial, syscfg};
 use rtfm::app;
 use stm32l0xx_hal as hal;
 
@@ -25,7 +25,7 @@ const APP: () = {
         buffer: [u8; 512],
         #[init(0)]
         count: u8,
-        int: pac::EXTI,
+        int: Exti,
         radio_irq: helium_tracker_feather::RadioIRQ,
         debug_uart: serial::Tx<helium_tracker_feather::DebugUsart>,
         uart_rx: serial::Rx<helium_tracker_feather::DebugUsart>,
@@ -60,11 +60,11 @@ const APP: () = {
 
         write!(tx, "LongFi Device Test\r\n").unwrap();
 
-        let mut exti = device.EXTI;
+        let mut exti = Exti::new(device.EXTI);
         let hsi48 = rcc.enable_hsi48(&mut syscfg, device.CRS);
         let rng = Rng::new(device.RNG, &mut rcc, hsi48);
         let radio_irq =
-            helium_tracker_feather::initialize_radio_irq(gpiob.pb0, &mut syscfg, &mut exti);
+            helium_tracker_feather::initialize_radio_irq(gpiob.pb0.into_floating_input(), &mut syscfg, &mut exti);
 
         *BINDINGS = Some(helium_tracker_feather::LongFiBindings::new(
             device.SPI2,
@@ -76,7 +76,7 @@ const APP: () = {
             gpiob.pb12,
             gpiob.pb1,
             gpioa.pa15,
-            gpioc.pc2,
+            gpioc.pc2.into_floating_input(),
             gpiob.pb4,
             gpiob.pb3,
             gpiob.pb5,
@@ -201,9 +201,7 @@ const APP: () = {
 
     #[task(binds = EXTI0_1, priority = 1, resources = [radio_irq, int], spawn = [radio_event])]
     fn EXTI0_1(ctx: EXTI0_1::Context) {
-        ctx.resources
-            .int
-            .clear_irq(ctx.resources.radio_irq.pin_number());
+        Exti::unpend(exti::GpioLine::from_raw_line(ctx.resources.radio_irq.pin_number()).unwrap());
         ctx.spawn.radio_event(RfEvent::DIO0).unwrap();
     }
 
