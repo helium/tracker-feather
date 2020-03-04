@@ -1,6 +1,5 @@
 use crate::hal::prelude::*;
-use hal::device;
-use hal::exti;
+use hal::exti::{self, Exti, ExtiLine as _};
 use hal::gpio::*;
 use hal::pac;
 use hal::rcc::Rcc;
@@ -14,31 +13,28 @@ pub struct LongFiBindings {
     pub bindings: BoardBindings,
 }
 
-type Uninitialized = Input<Floating>;
+type Uninitialized = Analog;
 
 pub type RadioIRQ = gpiob::PB0<Input<Floating>>;
 
 pub fn initialize_radio_irq(
-    pin: gpiob::PB0<Uninitialized>,
+    pin: gpiob::PB0<Input<Floating>>,
     syscfg: &mut hal::syscfg::SYSCFG,
-    exti: &mut pac::EXTI,
+    exti: &mut Exti,
 ) -> RadioIRQ {
-    // // Configure PB0 as input.
-    let dio1 = pin.into_floating_input();
-
-    exti.listen(
+    exti.listen_gpio(
         syscfg,
-        dio1.port(),
-        dio1.pin_number(),
+        pin.port(),
+        exti::GpioLine::from_raw_line(pin.pin_number()).unwrap(),
         exti::TriggerEdge::Rising,
     );
 
-    dio1
+    pin
 }
 
 impl LongFiBindings {
     pub fn new(
-        spi_peripheral: device::SPI2,
+        spi_peripheral: pac::SPI2,
         rcc: &mut Rcc,
         rng: rng::Rng,
         spi_sck: gpiob::PB13<Uninitialized>,
@@ -47,7 +43,7 @@ impl LongFiBindings {
         spi_nss_pin: gpiob::PB12<Uninitialized>,
         reset: gpiob::PB1<Uninitialized>,
         ant_en: gpioa::PA15<Uninitialized>,
-        radio_busy: gpioc::PC2<Uninitialized>,
+        radio_busy: gpioc::PC2<Input<Floating>>,
         se_csd: gpiob::PB4<Uninitialized>,
         se_cps: gpiob::PB3<Uninitialized>,
         se_ctx: gpiob::PB5<Uninitialized>,
@@ -186,9 +182,9 @@ extern "C" fn busy_pin_status() -> bool {
 type SpiPort = hal::spi::Spi<
     hal::pac::SPI2,
     (
-        hal::serial::PB13<hal::gpio::Input<hal::gpio::Floating>>,
-        hal::serial::PB14<hal::gpio::Input<hal::gpio::Floating>>,
-        hal::serial::PB15<hal::gpio::Input<hal::gpio::Floating>>,
+        hal::serial::PB13<Uninitialized>,
+        hal::serial::PB14<Uninitialized>,
+        hal::serial::PB15<Uninitialized>,
     ),
 >;
 static mut SPI: Option<SpiPort> = None;
