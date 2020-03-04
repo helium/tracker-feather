@@ -18,21 +18,18 @@ type Uninitialized = Analog;
 pub type RadioIRQ = gpiob::PB0<Input<Floating>>;
 
 pub fn initialize_radio_irq(
-    pin: gpiob::PB0<Uninitialized>,
+    pin: gpiob::PB0<Input<Floating>>,
     syscfg: &mut hal::syscfg::SYSCFG,
     exti: &mut Exti,
 ) -> RadioIRQ {
-    // // Configure PB0 as input.
-    let dio1 = pin.into_floating_input();
-
     exti.listen_gpio(
         syscfg,
-        dio1.port(),
-        exti::GpioLine::from_raw_line(dio1.pin_number()).unwrap(),
+        pin.port(),
+        exti::GpioLine::from_raw_line(pin.pin_number()).unwrap(),
         exti::TriggerEdge::Rising,
     );
 
-    dio1
+    pin
 }
 
 impl LongFiBindings {
